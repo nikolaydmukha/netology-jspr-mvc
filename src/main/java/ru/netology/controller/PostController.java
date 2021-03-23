@@ -3,6 +3,7 @@ package ru.netology.controller;
 import com.google.gson.Gson;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import ru.netology.exception.NotFoundException;
 import ru.netology.model.Post;
 import ru.netology.service.PostService;
 
@@ -10,7 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@Controller
+@RestController
 @RequestMapping("/api/posts")
 public class PostController {
   public static final String APPLICATION_JSON = "application/json";
@@ -25,15 +26,23 @@ public class PostController {
     response.setContentType(APPLICATION_JSON);
     final var data = service.all();
     final var gson = new Gson();
-    response.getWriter().print(gson.toJson(data));
+    response.getWriter().print(gson.toJson(data));;
   }
 
   @GetMapping("/{id}")
-  public void getById(@PathVariable long id, HttpServletResponse response) {
+  public void getById(@PathVariable long id, HttpServletResponse response)  throws IOException {
     // TODO: deserialize request & serialize response
+    final var gson = new Gson();
+    try {
+      Post postById = service.getById(id);
+      response.getWriter().print(gson.toJson(postById));
+
+    } catch (NotFoundException ex) {
+      response.getWriter().print("No post found with id = " + id);
+    }
   }
 
-  @PostMapping
+  @PostMapping("/{id}")
   public void save(HttpServletRequest request, HttpServletResponse response) throws IOException {
     response.setContentType(APPLICATION_JSON);
     final var gson = new Gson();
@@ -43,7 +52,9 @@ public class PostController {
   }
 
   @DeleteMapping("/{id}")
-  public void removeById(long id, HttpServletResponse response) {
+  public void removeById(long id, HttpServletResponse response) throws IOException {
     // TODO: deserialize request & serialize response
+    service.removeById(id);
+    response.getWriter().print("Success delete post with id = " + id);
   }
 }
