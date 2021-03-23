@@ -52,7 +52,7 @@ public class PostController {
   }
 
   @DeleteMapping("/{id}")
-  public void removeById(long id, HttpServletResponse response) throws IOException {
+  public void removeById(@PathVariable long id, HttpServletResponse response) throws IOException {
     // TODO: deserialize request & serialize response
     service.removeById(id);
     response.getWriter().print("Success delete post with id = " + id);
