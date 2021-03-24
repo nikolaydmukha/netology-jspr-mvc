@@ -5,6 +5,7 @@ import ru.netology.exception.NotFoundException;
 import ru.netology.model.Post;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 public class PostRepositoryStubImpl implements PostRepository {
@@ -17,11 +18,18 @@ public class PostRepositoryStubImpl implements PostRepository {
     }
 
     public List<Post> all() {
-        return repositoryData;
+
+        return repositoryData.stream()
+                .filter(p -> !p.getDeleted())
+                .collect(Collectors.toList());
     }
 
     public Optional<Post> getById(long id) {
-        Optional<Post> value = repositoryData.stream().filter(p -> p.getId() == id).findFirst();
+        Optional<Post> value = repositoryData
+                .stream()
+                .filter(p -> p.getId() == id)
+                .filter(p -> !p.getDeleted())
+                .findFirst();
         return value;
     }
 
@@ -48,8 +56,9 @@ public class PostRepositoryStubImpl implements PostRepository {
     public synchronized void removeById(long id) {
         Iterator<Post> it = repositoryData.iterator();
         while (it.hasNext()) {
-            if (it.next().getId() == id) {
-                it.remove();
+            Post p = it.next();
+            if (p.getId() == id) {
+                p.setDeleted(true);
                 break;
             }
         }
